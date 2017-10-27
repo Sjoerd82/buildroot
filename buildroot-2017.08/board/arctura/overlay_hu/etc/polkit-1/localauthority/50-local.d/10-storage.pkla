@@ -1,0 +1,4 @@
+[automount]
+    Identity=user-group:floppy
+    Action=org.freedesktop.udisks.filesystem-mount
+    ResultAny=yes

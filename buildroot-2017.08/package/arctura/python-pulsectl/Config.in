@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_PULSECTL
+	bool "python-pulsectl"
+	help
+	  Python high-level interface and ctypes-based bindings
+          for PulseAudio (libpulse)
+
+	  https://pypi.python.org/pypi/pulsectl

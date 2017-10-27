@@ -1,0 +1,11 @@
+i2c-dev
+#snd_soc_pcm512x
+#snd_soc_wm8804
+#snd_soc_pcm5102a
+#snd_soc_hifiberry_dac
+
+#Bluetooth
+#btbcm
+#bluetooth
+#bnep 		#ethernet
+#hci_uart	#uart

@@ -1,0 +1,6 @@
+config BR2_PACKAGE_UDISKS_GLUE
+	bool "udisks-glue"
+	help
+	  Utility to associate udisks events to user-defined actions.
+
+	  https://github.com/fernandotcl/udisks-glue
