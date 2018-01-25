@@ -1,0 +1,79 @@
+#!/bin/sh
+# Check for updates
+# Requires a working internet connection, therefore, place it after S90wlan
+
+#UPDATE="/root/defender-headunit/git_update.sh"
+
+MNT_DIR="/mnt/PIHU_APP"
+APP_DIR="/mnt/PIHU_APP/defender-headunit"
+GIT_DIR="/mnt/PIHU_APP/defender-headunit/git"
+FIRSTBOOT=0
+
+start() {
+
+        # Application is on /dev/mmcblk0p3
+        #  --> Check the partition's label?
+        #  --> This partition should be mounted by this script
+
+        # Double check the partition number (PIHU_APP)
+        blkid | grep PIHU_APP | grep /dev/mmcblk0p3
+        if [ $? -ne 0 ]; then
+                echo "/dev/mmcblk0p3 is not PIHU_APP.. aborting"
+                exit 1
+        fi
+
+	# just in case...
+	umount /dev/mmcblk0p3
+
+        # first do a fsck, just in case
+        fsck /dev/mmcblk0p3
+
+        # mount partition rw
+        mount /dev/mmcblk0p3 $MNT_DIR
+
+        # git update
+        if [ -d $GIT_DIR ]; then
+                echo "GIT dir found"
+                git -C $APP_DIR --git-dir=$GIT_DIR fetch --all
+                git -C $APP_DIR --git-dir=$GIT_DIR reset --hard origin/master
+                git -C $APP_DIR --git-dir=$GIT_DIR clean --force
+        elif [ -d $MNT_DIR -a ! -d $APP_DIR ]; then
+                echo "App not found, downloading..."
+                #git clone git://github.com/Sjoerd82/defender-headunit $APP_DIR
+                #mv $APP_DIR/.git $GIT_DIR
+
+                # firstboot.. start the application, after remounting
+		$FIRSTBOOT=1
+
+        fi
+
+        # remount partition ro
+	umount /dev/mmcblk0p3
+        mount -r /dev/mmcblk0p3 $MNT_DIR
+
+	# if the app is just installed, then start it:
+	if [ $FIRSTBOOT == 1 ]; then
+		/etc/init.d/S31dbus_remote
+		/etc/init.d/S31dbus_mpd
+		/etc/init.d/S70headunit
+                # + other scripts..
+	fi
+
+        #if [ -f $UPDATE ]; then
+        #  echo "Updating ..."
+        #  $UPDATE
+        #else
+        #  echo "Update script not available."
+        #fi
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  *)
+        echo "Usage: $0 {start}"
+        exit 1
+esac
+
+exit $?

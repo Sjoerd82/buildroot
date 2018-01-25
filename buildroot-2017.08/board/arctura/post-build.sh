@@ -13,8 +13,37 @@ fi
 # Remove ttyAMA0 from cmdline
 
 # Reorder init scripts
-if [ -e ${TARGET_DIR}/etc/S95mpd ]; then
-    mv ${TARGET_DIR}/etc/S95mpd ${TARGET_DIR}/etc/S51mpd
+if [ -e ${TARGET_DIR}/etc/init.d/S95mpd ]; then
+    echo "test" > ${TARGET_DIR}/etc/test.txt
+    mv ${TARGET_DIR}/etc/init.d/S95mpd ${TARGET_DIR}/etc/init.d/S52mpd
 fi
 
+# S01logging
+# S02firstboot
+# S03modules
+# S10udev
+# S20urandom
+
+# S30dbus
+# S31dbus-remote
+
+# S40network            <- S40network (provide lo interface)
+# S41bluetooth          <- S41
+
+# S50udisks-glue        <- S60udisk-glue
+# S51pulseaudio         <- S50pulseaudio
+# S52mpd                <- S95mpd
+# S59headunit
+
+# S60wlan
+# S70dropbear
+# S71smb
+
 # Add SMB user
+
+# THE FOLLOWING WORKS, but we now use the system.conf in the overlay..
+# Allow DBUS service
+# ToDo: maybe use XMLstarlet or something more stable....
+#if [ -e ${TARGET_DIR}/share/dbus-1/system.conf ]; then
+#  sed -i '52i\    <allow own=\"com.arctura.remote\"/>' ${TARGET_DIR}/share/system.conf
+#fi

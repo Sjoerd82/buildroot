@@ -5,6 +5,13 @@ BOARD_NAME="$(basename ${BOARD_DIR})"
 GENIMAGE_CFG="${BOARD_DIR}/genimage-${BOARD_NAME}.cfg"
 GENIMAGE_TMP="${BUILD_DIR}/genimage.tmp"
 
+# Custom images
+yes | cp ${BOARD_DIR}/app.ext4 ${BINARIES_DIR}
+yes | cp ${BOARD_DIR}/boot.vfat ${BINARIES_DIR}
+
+# Disable consoleblanking
+sed ' 1 s/.*/&consoleblank=0/' ${BINARIES_DIR}/rpi-firmware/cmdline.txt
+
 cat << __EOF__ >> "${BINARIES_DIR}/rpi-firmware/config.txt"
 dtparam=i2c1=on
 dtparam=i2c_arm=on

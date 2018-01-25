@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_PIDFILE
+	bool "python-pidfile"
+	help
+	  PIDFile context processor. Supported py2 and py3
+
+	  https://pypi.python.org/pypi/python-pidfile/
