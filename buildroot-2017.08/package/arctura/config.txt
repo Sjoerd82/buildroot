@@ -1,0 +1,27 @@
+menu "Arctura"
+        source "package/udisks-glue/Config.in"
+        source "package/wiringpi/Config.in"
+        source "package/python-cython/Config.in"
+
+if BR2_PACKAGE_PYTHON || BR2_PACKAGE_PYTHON3
+menu "External python modules"
+        source "package/python-pidfile/Config.in"
+        source "package/python-pulsectl/Config.in"
+        source "package/python-libpulseaudio/Config.in"
+        source "package/python-nose/Config.in"
+        source "package/python-pid/Config.in"
+        source "package/python-pid-local/Config.in"
+        source "package/python-adafruit-pureio/Config.in"
+        source "package/python-adafruit_gpio/Config.in"
+        source "package/python-ads1x15/Config.in"
+        source "package/python-mpd2/Config.in"
+        source "package/python-mpd/Config.in"
+        source "package/python-tendo/Config.in"
+        source "package/python-pycryptodome/Config.in"
+        source "package/python-oauth2client/Config.in"
+        source "package/python-rsa/Config.in"
+        source "package/python-MechanicalSoup/Config.in"
+        source "package/python-pytest-runner/Config.in"
+endmenu
+endif
+endmenu
