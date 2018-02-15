@@ -28,26 +28,38 @@ start() {
         # first do a fsck, just in case
         fsck /dev/mmcblk0p3
 
-        # mount partition rw
+	###################################################################### 
+	# mount partition rw
         mount /dev/mmcblk0p3 $MNT_DIR
 
         # git update
         if [ -d $GIT_DIR ]; then
                 echo "GIT dir found"
+                git -C $APP_DIR --git-dir=$GIT_DIR remote set-url origin git://github.com/Sjoerd82/defender-headunit.git
                 git -C $APP_DIR --git-dir=$GIT_DIR fetch --all
                 git -C $APP_DIR --git-dir=$GIT_DIR reset --hard origin/master
                 git -C $APP_DIR --git-dir=$GIT_DIR clean --force
+		VERSION_NUMBER=$(git -C $APP_DIR --git-dir=$GIT_DIR describe --tags)
+		echo "__version__ = '$VERSION_NUMBER'" > $APP_DIR/version.py
         elif [ -d $MNT_DIR -a ! -d $APP_DIR ]; then
                 echo "App not found, downloading..."
                 #git clone git://github.com/Sjoerd82/defender-headunit $APP_DIR
                 #mv $APP_DIR/.git $GIT_DIR
 
                 # firstboot.. start the application, after remounting
-		$FIRSTBOOT=1
+		FIRSTBOOT=1
 
         fi
 
+        # init.d
+        cp -rf $APP_DIR/init.d/* /etc/init.d
+
+	# execute scripts in update folder
+	# todo
+
+	######################################################################
         # remount partition ro
+
 	umount /dev/mmcblk0p3
         mount -r /dev/mmcblk0p3 $MNT_DIR
 

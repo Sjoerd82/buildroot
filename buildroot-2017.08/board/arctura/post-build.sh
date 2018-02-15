@@ -18,6 +18,9 @@ if [ -e ${TARGET_DIR}/etc/init.d/S95mpd ]; then
     mv ${TARGET_DIR}/etc/init.d/S95mpd ${TARGET_DIR}/etc/init.d/S52mpd
 fi
 
+# Create app.ext4
+#/home/buildroot/buildroot/board/arctura/create-pihu-app-img.sh
+
 # S01logging
 # S02firstboot
 # S03modules

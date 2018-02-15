@@ -47,9 +47,19 @@ EOF
         mkdosfs -F 32 -I -n PIHU_DATA /dev/mmcblk0p6
         #reboot -f
 
+	#
+	# Install PIHU application
+	#
 	mount /dev/mmcblk0p3 /mnt/PIHU_APP
 	mount /dev/mmcblk0p5 /mnt/PIHU_CONFIG
-	cp /mnt/PIHU_APP/config/* /mnt/PIHU_CONFIG
+
+	# config
+	cp -rf /mnt/PIHU_APP/config/* /mnt/PIHU_CONFIG
+
+	# init.d
+	cp -rf /mnt/PIHU_APP/init.d/* /etc/init.d
+
+	# unmout (will be remounted later in init)
 	umount /dev/mmcblk0p3
 	umount /dev/mmcblk0p5
 
