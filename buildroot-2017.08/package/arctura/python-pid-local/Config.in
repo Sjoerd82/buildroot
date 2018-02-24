@@ -1,7 +1,0 @@
-config BR2_PACKAGE_PYTHON_PID_LOCAL
-	bool "python-pid-local"
-	help
-	  Pidfile featuring stale detection and file-locking,
-	  can also be used as context-manager or decorator
-
-	  https://pypi.python.org/pypi/pid/2.1.1

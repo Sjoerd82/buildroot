@@ -56,24 +56,36 @@ class mpdController():
 		#todo: how about cropping, populating, and removing the first? item .. for faster continuity???
 		#self.mpdc.command_list_ok_begin()
 
+		"""
 		try:
 			self.mpdc.noidle()
+		except MPDConnectionError:
+			self.mpdc.connect("localhost", 6600)
 		except:
 			printer('WEIRD... no idle was set..')
 		
-		self.mpdc.stop()
-		self.mpdc.clear()
+		try:
+			self.mpdc.stop()
+			self.mpdc.clear()
+		except:
+			printer('Dont know why but this sometimes failes!!!! Investigate..',level=LL_CRITICAL)
+		
 		self.mpdc.send_idle()
-
+		"""
 		#print self.mpdc.command_list_end()
-		#call(["mpc", "-q", "stop"])
-		#call(["mpc", "-q", "clear"])
-		#self.mpcd.close()
+		call(["mpc", "-q", "stop"])
+		call(["mpc", "-q", "clear"])
+
 
 	def playlistPop( self, type, sMpdDir ):
 		printer('Populating playlist, folder: {0}'.format(sMpdDir))
 
-		self.mpdc.noidle()
+		try:
+			self.mpdc.noidle()
+		except MPDConnectionError:
+			self.mpdc.connect("localhost", 6600)
+		except:
+			printer('WEIRD... no idle was set..')
 	
 		if type == 'locmus' or type == 'smb' or type == 'media':
 			try:
@@ -107,7 +119,13 @@ class mpdController():
 	def playlistIsPop( self ):
 		printer('Checking if playlist is populated')
 
-		self.mpdc.noidle()
+		try:
+			self.mpdc.noidle()
+		except MPDConnectionError:
+			self.mpdc.connect("localhost", 6600)
+		except:
+			printer('WEIRD... no idle was set..')
+		
 		self.mpdc.command_list_ok_begin()
 		self.mpdc.status()
 		results = self.mpdc.command_list_end()
@@ -155,6 +173,8 @@ class mpdController():
 
 		try:
 			self.mpdc.noidle()
+		except MPDConnectionError:
+			self.mpdc.connect("localhost", 6600)
 		except:
 			printer('WEIRD... no idle was set..')
 
@@ -217,6 +237,41 @@ class mpdController():
 					printer(' > Elapsed time below threshold or short track: restarting at beginning of track.')
 
 		return pos
+
+	def lastKnownPos2( self, filename, time ):
+	
+		#default
+		pos = {'pos': 1, 'time': 0}
+
+		#TODO!
+		iThrElapsed = 20	 # Minimal time that must have elapsed into a track in order to resume position
+		iThrTotal = 30		 # Minimal track length required in order to resume position
+		
+		try:
+			self.mpdc.noidle()
+		except MPDConnectionError:
+			self.mpdc.connect("localhost", 6600)
+		except:
+			printer('WEIRD... no idle was set..')
+		
+		psfind = self.mpdc.playlistfind('filename',filename)
+		self.mpdc.send_idle()
+		
+		#in the unlikely case of multiple matches, we'll just take the first, psfind[0]
+		if len(psfind) == 0:
+			printer(' > File not found in loaded playlist')
+		else:
+			pos['pos'] = int(psfind[0]['pos'])+1
+			timeElapsed,timeTotal = map(int, time.split(':'))
+			printer('Match found: {0}. Continuing playback at #{1}'.format(filename,pos['pos']))
+			printer(' > Elapsed/Total time: {0}s/{1}s'.format(timeElapsed,timeTotal))
+			if timeElapsed > iThrElapsed and timeTotal > iThrTotal:
+				pos['time'] = str(timeElapsed)
+				printer(' > Elapsed time over threshold: continuing at last position.')
+			else:
+				printer(' > Elapsed time below threshold or short track: restarting at beginning of track.')
+
+		return pos
 		
 #	def playStart( str(playslist_pos['pos']), playslist_pos['time'] ):
 	def playStart( self, pos, time ):
@@ -271,7 +326,13 @@ class mpdController():
 		
 	def mpc_get_currentsong( self ):
 	
-		self.mpdc.noidle()
+		try:
+			self.mpdc.noidle()
+		except MPDConnectionError:
+			self.mpdc.connect("localhost", 6600)
+		except:
+			printer('WEIRD... no idle was set..')
+			
 		self.mpdc.command_list_ok_begin()
 		self.mpdc.currentsong()
 		results = self.mpdc.command_list_end()
@@ -287,6 +348,8 @@ class mpdController():
 
 		try:
 			self.mpdc.noidle()
+		except MPDConnectionError:
+			self.mpdc.connect("localhost", 6600)
 		except:
 			printer('WEIRD... no idle was set..')
 
@@ -611,22 +674,6 @@ def mpc_populate_playlist ( label ):
 	#oMpdClient.send_idle()
 
 
-def mpc_playlist_is_populated():
-	# Old method using mpc on the commandline:
-	"""
-	task = subprocess.Popen("mpc playlist | wc -l", shell=True, stdout=subprocess.PIPE)
-	mpcOut = task.stdout.read()
-	assert task.wait() == 0
-	return mpcOut.rstrip('\n')
-	"""
-	# New method, using mpd status
-	xMpdClient = MPDClient() 
-	xMpdClient.connect("localhost", 6600)  # connect to localhost:6600
-	xMpdClient.command_list_ok_begin()
-	xMpdClient.status()
-	results = xMpdClient.command_list_end()
-	xMpdClient.close()
-	return results[0]['playlistlength']
 	
 
 def mpc_db_label_exist( label ):

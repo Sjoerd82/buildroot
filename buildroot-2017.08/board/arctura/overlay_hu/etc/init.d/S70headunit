@@ -2,7 +2,7 @@
 #Main headunit script
 
 # TODO
-DAEMON="/mnt/PIHU_APP/defender-headunit/headunit.py"
+DAEMON="/mnt/PIHU_APP/defender-headunit/hu.py"
 
 start() {
         if [ -f $DAEMON ]; then

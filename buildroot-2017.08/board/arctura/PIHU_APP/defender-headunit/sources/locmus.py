@@ -110,7 +110,7 @@ class sourceClass():
 				self.__printer(" > Local music directory does not exist.. creating...",LL_WARNING,True)
 				os.makedirs(mountpoint)
 				# obviously there will no be any music in that new directory, so marking it unavailable..
-				sourceCtrl.setAvailableIx( ix, True, ssIx )
+				sourceCtrl.setAvailableIx( ix, False, ssIx )
 
 			if not os.path.exists(mountpoint):
 				self.__printer(" > Local music directory does not exist.. Failed creating?",LL_WARNING,True)
@@ -123,7 +123,7 @@ class sourceClass():
 					
 					if not self.mpc.dbCheckDirectory( mpd_dir ):
 						self.__printer(" > Running MPD update for this directory.. ALERT! LONG BLOCKING OPERATION AHEAD...")
-						self.mpc.update( mpd_dir )
+						self.mpc.update( mpd_dir, True )	#TODO: don't wait! set available on return of update..
 						if not self.mpc.dbCheckDirectory( mpd_dir ):
 							self.__printer(" > Nothing to play marking unavailable...")
 						else:
@@ -142,7 +142,7 @@ class sourceClass():
 			return False
 
 		
-	def play( self, sourceCtrl ): #, subSourceIx=None ):
+	def play( self, sourceCtrl, resume={} ): #, subSourceIx=None ):
 		self.__printer('Start playing')
 		
 		#
@@ -177,11 +177,11 @@ class sourceClass():
 			self.mpc.playlistPop('locmus',sLocalMusicMPD)
 			
 			# check if succesful...
-			playlistCount = self.mpc.mpc_playlist_is_populated()
+			playlistCount = self.mpc.playlistIsPop()
 			if playlistCount == "0":
 				# Failed. Returning false will cause caller to try next source
 				self.__printer(' > Nothing in the playlist, giving up. Marking source unavailable.')
-				sourceCtrl.setAvailableIx( ix, False, subSourceIx )
+				sourceCtrl.setAvailableIx( arIx[0], False, arIx[1] )
 				pa_sfx(LL_ERROR)
 				return False
 			else:
@@ -192,9 +192,11 @@ class sourceClass():
 		#
 		# continue where left
 		#
-		
-		playslist_pos = self.mpc.lastKnownPos( sLabel )
-		
+		if resume:
+			playslist_pos = self.mpc.lastKnownPos2( resume['file'], resume['time'] )	
+		else:
+			playslist_pos = {'pos': 1, 'time': 0}
+			
 		self.__printer(' > Starting playback')
 		#mpc.playStart( str(playslist_pos['pos']), playslist_pos['time'] )
 		call(["mpc", "-q" , "stop"])
@@ -202,7 +204,7 @@ class sourceClass():
 		if playslist_pos['time'] > 0:
 			self.__printer(' ...  Seeking to {0} sec.'.format(playslist_pos['time']))
 			call(["mpc", "-q" , "seek", str(playslist_pos['time'])])
-
+			
 		# double check if source is up-to-date
 		
 		# Load playlist directories, to enable folder up/down browsing.

@@ -175,14 +175,6 @@ def volume_att_toggle():
 	hudispdata['att'] = '1'
 	disp.dispdata(hudispdata)
 	return None
-
-def volume_up():
-	print('Vol Up')
-	return None
-
-def volume_down():
-	print('Vol Down')
-	return None
 	
 # ********************************************************************************
 # Output wrapper
@@ -214,7 +206,88 @@ def queue(q, item, sfx=None):
 	#printer('Blocking Queue Size after: {0}'.format(qBlock.qsize()))
 	return 0
 
+# todo: rename? put in hu_settings?
+def save_current_position(timeelapsed):
 
+	global Sources
+	global mpdc
+	
+	currSrc = Sources.getComposite()
+	
+	# create filename
+	source_name = currSrc["name"]
+	if 'filename_save' in currSrc:
+		source_key = currSrc["filename_save"][0]	#eg "mountpoint"
+		if source_key in currSrc["subsource"]:
+			source_key_value = slugify( currSrc["subsource"][source_key] )
+		else:
+			printer("Error creating savefile, source_key ({0}) doesn't exist".format(source_key))
+			source_key_value = "untitled"
+	else:
+		printer('Error: "filename_save" not defined in configuration, not saving.',level=LL_ERROR)
+		return None
+
+	# get time into track
+	#timeelapsed = status['time']
+	
+	# get track name
+	currSong = mpdc.mpc_get_currentsong()
+	current_file = currSong['file']
+	"""print currSong
+	{'album': 'Exodus', 'composer': 'Andy Hunter/Tedd T.', 'title': 'Go', 'track': '1', 'duration': '411.480',
+	'artist': 'Andy Hunter', 'pos': '0', 'last-modified': '2013-10-12T15:53:13Z', 'albumartist': 'Andy Hunter',
+	'file': 'PIHU_SMB/music/electric/Andy Hunter/Andy Hunter - 2002 - Exodus/01 - Andy Hunter - Go.mp3',
+	'time': '411', 'date': '2002', 'genre': 'Electronic/Dance', 'id': '44365'}
+	"""
+
+	# put it together
+	dSave = {'file': current_file, 'time': timeelapsed}
+					
+	# save file
+	printer('Saving playlist position for: {0}: {1}'.format(source_name,source_key_value))
+	#print(' ...  file: {0}, time: {1}'.format(current_file,timeelapsed))
+
+	# create path, if it doesn't exist yet..
+	pckl_path = os.path.join('/mnt/PIHU_CONFIG',source_name)
+	if not os.path.exists(pckl_path):
+		os.makedirs(pckl_path)
+	# pickle file will be created by dump, if it doesn't exist yet
+	pckl_file = os.path.join(pckl_path,source_key_value + ".p")
+	pickle.dump( dSave, open( pckl_file, "wb" ) )
+
+def load_current_resume():
+
+	global Sources
+	global mpdc
+	
+	currSrc = Sources.getComposite()
+	
+	# create filename
+	source_name = currSrc["name"]
+	if 'filename_save' in currSrc:
+		source_key = currSrc["filename_save"][0]	#eg "mountpoint"
+		if source_key in currSrc["subsource"]:
+			source_key_value = slugify( currSrc["subsource"][source_key] )
+		else:
+			printer("Error creating savefile, source_key ({0}) doesn't exist".format(source_key))
+			source_key_value = "untitled"
+	else:
+		printer('Error: "filename_save" not defined in configuration, not saving.',level=LL_ERROR)
+		return None
+				
+	# load file
+	printer('Loading playlist position for: {0}: {1}'.format(source_name,source_key_value))
+
+	# check if there's a save file..
+	pckl_file = os.path.join('/mnt/PIHU_CONFIG',source_name,source_key_value + ".p")
+	if not os.path.exists(pckl_file):
+		printer('ERROR: Save file not found',level=LL_WARNING)
+		return None
+	else:
+		dLoad = pickle.load( open( pckl_file, "rb" ) )
+	return dLoad
+	
+	
 # ********************************************************************************
 # Callback functions
 #
@@ -363,6 +436,7 @@ def cb_mpd_event( event ):
 	# anything related to the player	
 	if event == "player":
 	
+		printer('Detected MPD event: player. Retrieving MPD state.')
 		# first let's determine the state:	
 		status = mpdc.mpc_get_status()
 		#print "STATUS: {0}.".format(status)
@@ -376,108 +450,49 @@ def cb_mpd_event( event ):
 		
 		if 'state' in status:
 			if status['state'] == 'stop':
-				print 'detected that mpd playback has stopped.. ignoring this'
+				print ' > MPD playback has stopped.. ignoring this'
 			elif status['state'] == 'pause':
-				print 'detected that mpd playback has paused.. ignoring this'
+				print ' > MPD playback has been paused.. ignoring this'
 			elif status['state'] == 'play':
-				print "do stuff for play"
+				printer(' > MPD playback is playing, saving to file. (SEEK/NEXT/PREV)')
 				
 				# one of the following possible things have happened:
 				# - prev track, next track, seek track
 						
-				###mpc_save_pos_for_label###
-				
-				#currSrc = Sources.get( None ) # None = Current
-				currSrc = Sources.getComposite()
-				print currSrc
-				
-				source_name = currSrc["name"]
-				if 'filename_save' in currSrc:
-					#source_key = currSrc["filename_save"]
-					# todo! get actual value and convert any slashes and other invalid filename chars to _
-					source_key = currSrc["filename_save"][0]	#eg "mountpoint"
-					source_key_value = slugify( currSrc["subsources"][0][source_key] )
-				else:
-					source_key = "untitled"
-				
+				#
+				# Save position
+				#
 				timeelapsed = status['time']
+				save_current_position(timeelapsed)
+
+				""" PROBLEMS AHEAD
 				
-				print source_name
-				print source_key
-				print source_key_value
-				print timeelapsed
-				try:
-					print currSrc["subsource_key"]
-					print currSrc["filename_save"]
-				except:
-					pass
-				print status['songid']
-				print status['elapsed']
-				print status['duration']
+				LCD DISPLAY
 				
+				#hu_details
+				mpcSong = mpdc.mpc_get_currentsong()
+				#mpcStatus = mpdc.mpc_get_status()
+				mpcTrackTotal = mpdc.mpc_get_trackcount()
+					
+				if 'artist' in mpcSong:
+					artist = mpcSong['artist']
+				else:
+					artist = None
+
+				if 'title' in mpcSong:
+					title = mpcSong['title']
+				else:
+					title = None
+					
+				if 'track' in mpcSong:
+					track = mpcSong['track']
+				else:
+					track = None
 				
+				file = os.path.basename(mpcSong['file'])
 				
-				currSong = mpdc.mpc_get_currentsong()
-				"""print currSong
-				{'album': 'Exodus', 'composer': 'Andy Hunter/Tedd T.', 'title': 'Go', 'track': '1', 'duration': '411.480',
-				'artist': 'Andy Hunter', 'pos': '0', 'last-modified': '2013-10-12T15:53:13Z', 'albumartist': 'Andy Hunter',
-				'file': 'PIHU_SMB/music/electric/Andy Hunter/Andy Hunter - 2002 - Exodus/01 - Andy Hunter - Go.mp3',
-				'time': '411', 'date': '2002', 'genre': 'Electronic/Dance', 'id': '44365'}
+				#disp.lcd_play( artist, title, file, track, mpcTrackTotal )
 				"""
-				current_file = currSong['file']
-				print current_file
-				
-				printer('Saving playlist position for: {0}, {1}'.format(source_name,source_key))
-				
-
-				dSavePosition = {'file': current_file, 'time': timeelapsed}
-				print(' ...  file: {0}, time: {1}'.format(current_file,timeelapsed))
-
-				# create path, if it doesn't exist yet..
-				pckl_path = os.path.join('/mnt/PIHU_CONFIG',source_name)
-				if not os.path.exists(pckl_path):
-					os.makedirs(pckl_path)
-				# pickle file will be created by dump, if it doesn't exist yet
-				pckl_file = os.path.join(pckl_path,source_key + ".p")
-				pickle.dump( dSavePosition, open( pckl_file, "wb" ) )
-
-				#if currSrc
-				
-				#"filename_save": ["uuid"]
-				
-				# OLD, NEEDS UPDATE: #todo
-				#	if not currSrc == None:
-				#		if 'label' in currSrc:
-				#			mpc_save_pos_for_label( currSrc['label'], "/mnt/PIHU_CONFIG" )
-				#		else:
-				#			mpc_save_pos_for_label( currSrc['name'], "/mnt/PIHU_CONFIG" )
-
-		""" PROBLEMS AHEAD
-		
-		#hu_details
-		mpcSong = mpdc.mpc_get_currentsong()
-		#mpcStatus = mpdc.mpc_get_status()
-		mpcTrackTotal = mpdc.mpc_get_trackcount()
-			
-		if 'artist' in mpcSong:
-			artist = mpcSong['artist']
-		else:
-			artist = None
-
-		if 'title' in mpcSong:
-			title = mpcSong['title']
-		else:
-			title = None
-			
-		if 'track' in mpcSong:
-			track = mpcSong['track']
-		else:
-			track = None
-		
-		file = os.path.basename(mpcSong['file'])
-		
-		#disp.lcd_play( artist, title, file, track, mpcTrackTotal )
-		"""
 				
 	elif event == "update":
 		printer(" ...  database update started or finished (no action)", tag='MPD')
@@ -563,6 +578,11 @@ def cb_timer1():
 
 	printer('Interval function [30 second]', level=LL_DEBUG, tag="TIMER1")
 
+	# save current position
+	# TODO: ONLY WHEN WE'RE ACTUALLY PLAYING SOMETHING...
+	#save_current_position()
+	
+	# WHAT'S THE POINT OF THIS?:
 	# save settings (hu_settings)
 	cSettings.save()
 	
@@ -700,6 +720,7 @@ def udisk_details( device, action ):
 			# check, and if available play
 			if Sources.sourceCheck( ix, ix_ss ):
 				Sources.setCurrent( ix, ix_ss )
+				#TODO: load resume
 				Sources.sourcePlay()
 		
 		# display overview
@@ -750,11 +771,16 @@ def do_source():
 		if not res == None:
 
 			#
-			# if succesful, play new source
+			# load resume data
+			#
+			dLoaded = load_current_resume()
+
+			#
+			# play new source
 			#
 			
-			Sources.sourceStop()
-			Sources.sourcePlay()
+			Sources.sourceStop()			# todo: required??
+			Sources.sourcePlay(dLoaded)
 			#
 			# update operational settings
 			#
@@ -1477,13 +1503,15 @@ def QuickPlay( prevSource, prevSourceSub ):
 		if len(prevIx) == 1:
 			printer ('Continuing playback', tag='QPLAY')
 			Sources.setCurrent(prevIx[0])
-			Sources.sourcePlay()
+			dLoaded = load_current_resume()
+			Sources.sourcePlay(dLoaded)
 			return True
 						
 		elif len(prevIx) == 2:
 			printer ('Continuing playback (subsource)', tag='QPLAY')
 			Sources.setCurrent(prevIx[0],prevIx[1])
-			Sources.sourcePlay()
+			dLoaded = load_current_resume()
+			Sources.sourcePlay(dLoaded)
 			return True
 
 		else:
@@ -1496,15 +1524,16 @@ def worker_queue_prio():
 	#	while not qPrio.empty():
 		item = qPrio.get()
 		#item = qPrio.get_nowait()
+		command = item['command']
 		
 		printer("Priority Queue: Picking up: {0}".format(item), tag='QUEUE')
-		if item == 'VOL_UP':
-			volume_up()
-		elif item == 'VOL_DOWN':
-			volume_down()
-		elif item == 'ATT':
+		if command == 'VOL_UP':
+			volm.incr("11")
+		elif command == 'VOL_DOWN':
+			volm.decr("11")
+		elif command == 'ATT':
 			volume_att_toggle()
-		elif item == 'OFF':
+		elif command == 'OFF':
 			shutdown()
 		else:
 			printer('Undefined task', level=LL_ERROR, tag='QUEUE')
@@ -1573,6 +1602,19 @@ class dbusDisplay(dbus.service.Object):
 	def dispdata(self, dispdata):
 		pass
 
+class dbusVolume(dbus.service.Object):
+	def __init__(self, conn, object_path='/com/arctura/volume'):
+		dbus.service.Object.__init__(self, conn, object_path)
+
+	#decided to just send everything as string, should be easier to handle...:
+	#dbus.service.signal("com.arctura.display", signature='a{sv}')
+	@dbus.service.signal("com.arctura.volume", signature='s')
+	def incr(self, dispdata):
+		pass
+
+	@dbus.service.signal("com.arctura.volume", signature='s')
+	def decr(self, dispdata):
+		pass
 #********************************************************************************
 #
 # Initialization
@@ -1803,7 +1845,20 @@ else:
 		Sources.next()
 		Sources.sourcePlay()
 
+# Save Settings
+currSrc = Sources.getComposite()
+cSettings.set('source',currSrc['name'])
 
+# update sub-source key (in case of sub-source)
+if currSrc['subsource']:
+	subsource_key = {}
+	for key in currSrc['subsource_key']:
+		subsource_key[key] = currSrc['subsource'][key]
+	cSettings.set('subsourcekey', subsource_key)
+
+cSettings.save()
+
+		
 	   
 """
 else:
@@ -1913,6 +1968,7 @@ bus = dbus.SystemBus()
 
 # Output
 disp = dbusDisplay(bus)
+volm = dbusVolume(bus)
 
 
 """

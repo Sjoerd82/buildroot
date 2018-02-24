@@ -169,9 +169,7 @@ class SourceController():
 				
 				# sub-source and available:
 				elif source['template'] and source['available']:
-					#print "DEBUG 3"
 					for subsource in source['subsources'][j_start:]:
-						#print "DEBUG B -- {0}".format(subsource)
 						if subsource['available']:
 							#print "DEBUG 4"
 							self.__printer('NEXT: Switching to {0}/{1}: {2:s}'.format(i_start,j_start,subsource['displayname']))
@@ -181,8 +179,7 @@ class SourceController():
 							self.iCurrentSource[1] = j_start
 							return self.iCurrentSource
 							
-					j_start += 1
-
+						j_start += 1
 
 				i_start += 1
 				
@@ -203,24 +200,30 @@ class SourceController():
 			if (self.iCurrentSource[0] is None or
 			    self.iCurrent is None):
 				i = 0
+				print "debug 1"
 				for source in self.lSource:
+					print "debug 2 {0}".format(i)
 					if source['available'] and not source['template']:
 						self.iCurrent = i
 						self.iCurrentSource[0] = i
 						self.iCurrentSource[1] = None
+						print "debug 3"
 						return self.iCurrentSource
 					elif source['available'] and source['template']:
 						self.iCurrentSource[0] = i
 						self.iCurrent = i
 						j = 0
+						print "debug 4"
 						for subsource in source['subsources']:
+							print "debug 5 {0}".format(j)
 							if subsource['available']:
 								self.iCurrentSS = j
 								self.iCurrentSource[1] = j
+								print "debug 6 {0}".format(j)
 								return self.iCurrentSource
 							j += 1
 					i += 1
-
+			print "debug 7"
 			return self.iCurrentSource
 
 		#
@@ -338,8 +341,20 @@ class SourceController():
 		else:
 			return copy.copy(self.lSource[index])			
 
+	# return the current source + subsource
+	# subsource is a dictionary in ['subsource'], containing the curren sub-source
+	# the returned source is stripped of python objects (for no real reason)
 	def getComposite( self ):
-		return dict( self.lSource[self.iCurrent].items() + self.lSource[self.iCurrent]['subsources'][self.iCurrentSS].items() )
+		# make a copy
+		composite_current_source = dict( self.lSource[self.iCurrent] )
+		# remove sub-sources:
+		del composite_current_source['subsources']
+		# add current sub-source: Note that this entry is called subsource, not subsources!
+		composite_current_source['subsource'] = self.lSource[self.iCurrent]['subsources'][self.iCurrentSS]
+		# remove not-usefull stuff:
+		del composite_current_source['sourceModule']	# what did we use this for again??? #TODO
+		del composite_current_source['sourceClass']		# what did we use this for again??? #TODO
+		return composite_current_source
 	
 	def getSubSources( self, index ):
 		return self.lSource[index]['subsources']
@@ -455,7 +470,8 @@ class SourceController():
 			i+=1
 	
 	# execute a play() for the current source
-	def sourcePlay( self ):
+	# optionally, a dictionary may be given containing resume data
+	def sourcePlay( self, resume={} ):
 	
 		if self.iCurrent == None:
 			self.__printer('PLAY: No current source',LL_WARNING)
@@ -468,8 +484,12 @@ class SourceController():
 #		if 'sourcePlay' not in self.lSource[self.iCurrent] or self.lSource[self.iCurrent]['sourcePlay'] == None:
 #			self.__printer('PLAY: function not defined',LL_WARNING)
 #			return False
+		
+		if resume:
+			checkResult = self.lSource[self.iCurrent]['sourceClass'].play(self,resume)
+		else:
+			checkResult = self.lSource[self.iCurrent]['sourceClass'].play(self)
 			
-		checkResult = self.lSource[self.iCurrent]['sourceClass'].play(self)
 		if not checkResult:
 			self.__printer('PLAY: failed, marking source unavailable, playing next source...',LL_ERROR)
 			self.setAvailableIx(self.iCurrent,False,self.iCurrentSS)

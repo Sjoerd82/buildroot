@@ -54,10 +54,10 @@ EOF
 	mount /dev/mmcblk0p5 /mnt/PIHU_CONFIG
 
 	# config
-	cp -rf /mnt/PIHU_APP/config/* /mnt/PIHU_CONFIG
+	cp -rf /mnt/PIHU_APP/defender-headunit/config/* /mnt/PIHU_CONFIG
 
 	# init.d
-	cp -rf /mnt/PIHU_APP/init.d/* /etc/init.d
+	cp -rf /mnt/PIHU_APP/defender-headunit/init.d/* /etc/init.d
 
 	# unmout (will be remounted later in init)
 	umount /dev/mmcblk0p3

@@ -155,7 +155,7 @@ class sourceClass():
 				self.__printer(" > Removable music directory present and has files.",LL_INFO,True)
 				if not self.mpc.dbCheckDirectory( mpd_dir ):
 					self.__printer(" > Running MPD update for this directory.. ALERT! LONG BLOCKING OPERATION AHEAD...")
-					self.mpc.update( mpd_dir )
+					self.mpc.update( mpd_dir, True )	#TODO: don't wait! set available on return of update..
 					if not self.mpc.dbCheckDirectory( mpd_dir ):
 						self.__printer(" > Nothing to play marking unavailable...")
 					else:
@@ -276,29 +276,16 @@ class sourceClass():
 		return False
 		"""
 		
-	def play( self, sourceCtrl, subSourceIx=None ):
+	def play( self, sourceCtrl, resume={} ):
 		self.__printer('Start playing (MPD)')
+		
 		#
 		# variables
 		#
-		
-		#debug/test:
-		sUsbLabel = "SJOERD"
-		sLocalMusicMPD = "SJOERD"
-		"""
-		global dSettings
-		global arMediaWithMusic
-		global Sources
-
-		if not mySources.getAvailable('name','media'):
-			print('Aborting playback, trying next source.')
-			pa_sfx('error')
-			#source_next()
-			Sources.sourceNext()
-			source_play()
-			
-		else:
-		"""
+		arIx = sourceCtrl.getIndexCurrent()
+		subsource = sourceCtrl.getSubSource( arIx[0], arIx[1] )
+		sLocalMusicMPD = subsource['mpd_dir']
+		sUsbLabel = subsource['label']
 
 		#
 		# load playlist
@@ -335,8 +322,11 @@ class sourceClass():
 		#
 		# continue where left
 		#
-		
-		playslist_pos = self.mpc.lastKnownPos( sUsbLabel )
+		if resume:
+			playslist_pos = self.mpc.lastKnownPos2( resume['file'], resume['time'] )
+			#playslist_pos = self.mpc.lastKnownPos( sUsbLabel )
+		else:
+			playslist_pos = {'pos': 1, 'time': 0}
 		
 		self.__printer(' > Starting playback')
 		#mpc.playStart( str(playslist_pos['pos']), playslist_pos['time'] )

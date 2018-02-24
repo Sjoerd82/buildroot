@@ -91,33 +91,36 @@ class sourceClass():
 		
 		ix = sourceCtrl.getIndex('name','smb')
 		mountpoints = []
+		locations = []
 		foundStuff = 0
-						
+
 		if subSourceIx == None:
 			subsources = sourceCtrl.getSubSources( ix )
 			for subsource in subsources:
-				mountpoints.append(subsource['mountpoint'])
+				locations.append( (subsource['mountpoint'], subsource['mpd_dir']) )
 			ssIx = 0
 		else:
 			subsource = sourceCtrl.getSubSource( ix, subSourceIx )
-			mountpoints.append(subsource['mountpoint'])
+			locations.append( (subsource['mountpoint'], subsource['mpd_dir']) )
 			ssIx = subSourceIx
 
-		# local dir, relative to MPD
-		sLocalMusicMPD = subsource['mpd_dir']
-
 		# check mountpoint(s)
-		for location in mountpoints:
-			self.__printer('SMB folder: {0}'.format(location))
-			if not os.listdir(location):
+		for location in locations:
+		
+			# get mountpoint and mpd dir
+			mountpoint = location[0]
+			mpd_dir = location[1]
+			
+			self.__printer('SMB folder: {0}'.format(mountpoint))
+			if not os.listdir(mountpoint):
 				self.__printer(" > SMB directory is empty.",LL_WARNING,True)
 			else:
 				self.__printer(" > SMB directory present and has files.",LL_INFO,True)
 				
-				if not self.mpc.dbCheckDirectory( sLocalMusicMPD ):
+				if not self.mpc.dbCheckDirectory( mpd_dir ):
 					self.__printer(" > Running MPD update for this directory.. ALERT! LONG BLOCKING OPERATION AHEAD...")
 					self.mpc.update( sLocalMusicMPD )
-					if not self.mpc.dbCheckDirectory( sLocalMusicMPD ):
+					if not self.mpc.dbCheckDirectory( mpd_dir ):
 						self.__printer(" > Nothing to play marking unavailable...")
 					else:
 						self.__printer(" > Music found after updating")
@@ -157,14 +160,15 @@ class sourceClass():
 			return False
 
 		
-	def play( self, sourceCtrl, subSourceIx=None ):
-		self.__printer('Start playing')
+	def play( self, sourceCtrl, resume={} ):
+		self.__printer('Start playing (MPD)')
+		
 		#
 		# variables
 		#
-		
-		sLocalMusicMPD = "PIHU_SMB/music"
-		sUsbLabel = "smb_music"
+		arIx = sourceCtrl.getIndexCurrent()
+		subsource = sourceCtrl.getSubSource( arIx[0], arIx[1] )
+		sLocalMusicMPD = subsource['mpd_dir']
 
 		#
 		# load playlist
@@ -199,16 +203,19 @@ class sourceClass():
 		#
 		# continue where left
 		#
-		
-		playslist_pos = self.mpc.lastKnownPos( sUsbLabel )
+		if resume:
+			playslist_pos = self.mpc.lastKnownPos2( resume['file'], resume['time'] )	
+		else:
+			playslist_pos = {'pos': 1, 'time': 0}
 		
 		self.__printer(' > Starting playback')
-		#self.mpc.playStart( str(playslist_pos['pos']), playslist_pos['time'] )
+		#mpc.playStart( str(playslist_pos['pos']), playslist_pos['time'] )
 		call(["mpc", "-q" , "stop"])
 		call(["mpc", "-q" , "play", str(playslist_pos['pos'])])
 		if playslist_pos['time'] > 0:
-			self.__printer(' > Seeking to {0} sec.'.format(playslist_pos['time']))
+			self.__printer(' ...  Seeking to {0} sec.'.format(playslist_pos['time']))
 			call(["mpc", "-q" , "seek", str(playslist_pos['time'])])
+
 
 		# double check if source is up-to-date
 		

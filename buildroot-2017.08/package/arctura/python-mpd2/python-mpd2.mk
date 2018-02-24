@@ -11,6 +11,6 @@ PYTHON_MPD2_LICENSE = LGPL
 PYTHON_MPD2_LICENSE_FILES = LICENSE
 PYTHON_MPD2_DEPENDENCIES = zlib
 PYTHON_MPD2_ENV = PYTHONPATH=/home/buildroot/buildroot-2017.08/output/target/usr/lib/python2.7/site-packages/
-PYTHON_MPD2_SETUP_TYPE = distutils
+PYTHON_MPD2_SETUP_TYPE = setuptools
 
 $(eval $(python-package))
