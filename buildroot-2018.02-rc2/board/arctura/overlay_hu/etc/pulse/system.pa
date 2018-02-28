@@ -1,0 +1,117 @@
+#!/usr/bin/pulseaudio -nF
+#
+# This file is part of PulseAudio.
+#
+# PulseAudio is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# PulseAudio is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with PulseAudio; if not, see <http://www.gnu.org/licenses/>.
+
+# This startup script is used only if PulseAudio is started in system
+# mode.
+
+### Automatically load driver modules depending on the hardware available
+
+### module-udev-detect
+###  Detects ALSA audio devices on the system using udev
+###
+.ifexists module-udev-detect.so
+load-module module-udev-detect
+.else
+### Use the static hardware detection module (for systems that lack udev/hal support)
+load-module module-detect
+.endif
+
+### DEVICE DRIVERS (loaded via module-udev-detect)
+###
+###  -alsa-card				# Creates a PulseAudio card for an ALSA card.
+
+### PROTOCOLS
+###
+###  -cli				# TTY
+###  -cli-protocol-{unix,tcp}		# Socket, 
+###  -simple-protocol-{unix,tcp}	# Socket, connect using netcat, etc.
+###  -esound-protocol-{unix,tcp}	# Enhanced Sound Daemon
+###  -native-protocol-{unix,tcp}	# Native
+###  -native-protocol-fd		# Used by daemon, don't use it directly.
+###  -http-protocol-tcp			# Experimental. Works on port 4714.
+
+### 
+#
+# For some reason PulseAudio can't find the cookie file, even though it exists on the location in the error message.
+# For now, simply disable the auth cookie. Since we're not dealing with users, we might not even really need it.. (?)
+#load-module module-native-protocol-unix
+load-module module-native-protocol-unix auth-cookie-enabled=0
+
+
+### SAVE/RESTORE SETTINGS
+###
+###  -default-device-restore		# Automatically restore the default sink and source (configuration is saved in a file)
+###  -card-restore			# Automatically restore profile of cards
+###  -device-restore			# Automatically restore the volume of devices
+###  -stream-restore			# Automatically restore the volume of streams
+###  -device-manager			#
+
+load-module module-stream-restore
+load-module module-device-restore
+
+### Automatically restore the default sink/source when changed by the user
+### during runtime
+### NOTE: This should be loaded as early as possible so that subsequent modules
+### that look up the default sink/source get the right value
+load-module module-default-device-restore
+
+### BLUETOOTH
+###
+###  -bluetooth-discover		# Detects available bluetooth audio devices using BlueZ
+###  -bluetooth-policy			# Takes care of any bluetooth specific policy
+###  -bluetooth-proximity		# Bluetooth proximity volume control
+
+.ifexists module-bluetooth-policy.so
+load-module module-bluetooth-policy
+.endif
+
+.ifexists module-bluetooth-discover.so
+load-module module-bluetooth-discover
+.endif
+
+
+### MISC.
+###
+###  -sine				# Creates a sink input and generates a sine waveform stream.
+###  -sine-source			# Creates a source and generates a sine waveform stream.
+###  -esound-compat-spawnfd		# This is a compatibility module for libesd based autospawning of PulseAudio. Don't use it directly.
+###  -esound-compat-spawnpid		# This is a compatibility module for libesd based autospawning of PulseAudio. Don't use it directly.
+###  -match				# Adjust the volume of a playback stream automatically based on its name.
+###  -detect				# Detect audio devices on systems that have no udev.
+###  -zeroconf-publish			# Publish all local sinks/sources using mDNS Zeroconf.
+###  -zeroconf-discover			# Discover sinks/sources on other PulseAudio servers using mDNS Zeroconf.
+###  -rescue-streams			# Automatically route a stream whose sink has become unavailable (e.g. USB hw plugged out) to another working sink.
+###  -systemd-login			# 
+###  -console-kit			# 
+###  -position-event-sounds		# Enable positioned event sounds
+###  -always-sink			# Always keeps at least one sink loaded even if it's a null one
+###  -suspend-on-idle			# Automatically suspend sinks/sources that become idle for too long
+###  -loopback				# 
+###  -switch-on-connect			# 
+###  -role-ducking			# 
+###  -allow-passthrough			# 
+
+### Automatically move streams to the default sink if the sink they are
+### connected to dies, similar for sources
+load-module module-rescue-streams
+
+load-module module-always-sink
+#load-module module-suspend-on-idle
+#load-module module-position-event-sounds
+
+load-module module-switch-on-connect
+

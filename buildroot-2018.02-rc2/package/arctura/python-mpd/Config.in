@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_PYTHON-MPD
+	bool "python-mpd"
+	help
+	  An MPD (Music Player Daemon) client library written in pure
+          Python.
+
+	  https://pypi.python.org/pypi/python-mpd

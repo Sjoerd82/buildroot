@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_PYTEST_RUNNER
+	bool "python-pytest-runner"
+	help
+	  Invoke py.test as distutils command with dependency resolution
+
+	  https://pypi.python.org/pypi/pytest-runner

@@ -1,0 +1,47 @@
+#********************************************************************************
+#
+# Source: Example
+#
+
+from hu_utils import *
+
+sourceName='example'
+
+class sourceClass():
+
+	# Wrapper for "myprint"
+	def __printer( self, message, level=LL_INFO, continuation=False, tag=sourceName ):
+		if continuation:
+			myprint( message, level, '.'+tag )
+		else:
+			myprint( message, level, tag )
+
+	def __init__( self ):
+		self.__printer('Source Class Init', level=LL_DEBUG)
+		
+	def __del__( self ):
+		print('Source Class Deleted {0}'.format(sourceName))
+		
+	def init( self, sourceCtrl ):
+		self.__printer('Initializing...', level=15)
+		return True
+
+	def check( self, sourceCtrl, subSourceIx=None  ):
+		self.__printer('Checking availability...', level=15)
+		return True
+		
+	def play( self, sourceCtrl, subSourceIx=None ):
+		self.__printer('Start playing')
+		return True	
+
+	def stop( self, sourceCtrl ):
+		self.__printer('Stop')
+		return True
+		
+	def next( self ):
+		self.__printer('Next track')
+		return True
+		
+	def prev( self ):
+		self.__printer('Prev track')
+		return True

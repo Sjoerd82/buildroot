@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_ADS1X15
+	bool "python-ads1x15"
+	help
+	  Python code to use the ADS1015 and ADS1115 analog to
+          digital converters with a Raspberry Pi or BeagleBone
+          black.
+
+	  https://pypi.python.org/pypi/Adafruit-ADS1x15

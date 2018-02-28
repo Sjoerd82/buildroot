@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_TENDO
+	bool "python-tendo"
+	help
+	  Tendo is a python module that adds basic functionality that
+          is not (yet) provided by Python.
+
+	  https://pypi.python.org/pypi/tendo

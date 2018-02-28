@@ -1,0 +1,9 @@
+auto lo
+iface lo inet loopback
+  #post-up /root/lo-up.sh
+
+allow-hotplug wlan0
+iface wlan0 inet manual
+  wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+  post-up mpc sendmessage ifup wlan0
+  post-down mpc sendmessage ifdown wlan0

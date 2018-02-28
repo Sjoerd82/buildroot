@@ -1,0 +1,7 @@
+config BR2_PACKAGE_RT_PLUGINS
+	bool "rt-plugins"
+	help
+          LADSPA plugins for Active Loudspeakers
+
+	  http://faculty.tru.ca/rtaylor/rt-plugins/index.html
+

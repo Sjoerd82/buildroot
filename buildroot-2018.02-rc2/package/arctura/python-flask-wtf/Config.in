@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_FLASK_WTF
+	bool "python-flask-wtf"
+	select BR2_PACKAGE_PYTHON_WTFORMS
+	help
+	  Simple integration of Flask and WTForms.
+
+	  https://pypi.python.org/pypi/Flask-WTF
