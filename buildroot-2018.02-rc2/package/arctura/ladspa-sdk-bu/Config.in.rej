@@ -1,0 +1,10 @@
+--- Config.in
++++ Config.in
+@@ -493,6 +493,7 @@
+ source "package/audiofile/Config.in"
+ source "package/celt051/Config.in"
+ source "package/fdk-aac/Config.in"
++source "package/ladspa-sdk/Config.in"
+ source "package/libao/Config.in"
+ source "package/libcdaudio/Config.in"
+ source "package/libcdio/Config.in"

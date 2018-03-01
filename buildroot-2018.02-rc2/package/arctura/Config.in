@@ -31,6 +31,7 @@ menu "External python modules"
         source "package/arctura/python-rplcd/Config.in"
         source "package/arctura/python-tendo/Config.in"
         source "package/arctura/python-unidecode/Config.in"
+	source "package/arctura/python-wtforms/Config.in"
 endmenu
 endif
 #endmenu
