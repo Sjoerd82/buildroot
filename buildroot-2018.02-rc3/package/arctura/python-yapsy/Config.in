@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_YAPSY
+	bool "python-yapsy"
+	help
+	  Yet another plugin system
+
+	  https://pypi.python.org/pypi/Yapsy

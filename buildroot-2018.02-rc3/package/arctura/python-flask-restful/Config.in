@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_FLASK_RESTFUL
+	bool "python-flask-restful"
+	select BR2_PACKAGE_PYTHON_FLASK
+	help
+	  Simple framework for creating REST APIs
+
+	  https://pypi.python.org/pypi/Flask-RESTful

@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Start the network....
+#
+
+IFACE_FILE=/etc/network/if-ap
+
+# Debian ifupdown needs the /run/network lock directory
+mkdir -p /run/network
+
+case "$1" in
+  start)
+        printf "Starting network: "
+        /sbin/ifup -a -i $IFACE_FILE
+        [ $? = 0 ] && echo "OK" || echo "FAIL"
+        ;;
+  stop)
+        printf "Stopping network: "
+        /sbin/ifdown -a -i $IFACE_FILE
+        [ $? = 0 ] && echo "OK" || echo "FAIL"
+        ifconfig wlan0 down
+        ipaddr flush wlan0
+        ;;
+  restart|reload)
+        "$0" stop
+        "$0" start
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
+

@@ -1,0 +1,304 @@
+{
+	"files": {
+		  "log": "headunit"
+		, "state": "state.json"
+		, "settings": "dSettings.json"
+	}
+	, "directories": {
+		  "controls": "/mnt/PIHU_APP/defender-headunit/plugins/control/"
+		, "output": "/mnt/PIHU_APP/defender-headunit/plugins/output/"
+		, "app-root": "/mnt/PIHU_APP/defender-headunit"
+		, "plugin-other": "/mnt/PIHU_APP/defender-headunit/plugin_other/"
+		, "config": "/mnt/PIHU_CONFIG"
+		, "log": "/mnt/PIHU_CONFIG/log"
+		, "sfx": "/mnt/PIHU_APP/defender-headunit/sfx"
+	}
+	, "preferences": {
+		  "start_source": "resume"
+		, "retain_random": false
+		, "media_autoplay": true
+		, "mount_media": "ro"
+		, "threshold_elapsed_sec": 20
+		, "threshold_total_sec": 30
+	}
+	, "default_settings": {
+		  "volume": 20
+		, "source": ""
+		, "subsourcekey": {}
+		, "runcount": 0
+	}
+	, "daemons": [
+		{
+		  "name":"ZMQ Forwarder"
+		, "init.d":"S30zmqfwd"
+		} ,
+		{
+		  "name":"Source Controller"
+		, "init.d":"S40source"
+		, "port": 5555
+		},
+		{
+		  "name":"Flask HTTP server"
+		, "init.d":"S95flask"
+		},
+		{
+		  "name":"Control: ADS1x15"
+		, "init.d":"S71ads1x15"
+		}
+	]
+	, "audio_output": {
+		"pulse-sink": "alsa_output.platform-soc_sound.analog-stereo"
+	   ,"mpd_output": "pulse audio"
+	}
+	, "wifi": {
+		  "ip": "dhcp"
+		, "mode": "network"
+		, "ap": {
+			  "ssid":"headunit"
+			, "psk": "f22da64fa334468e8b0ace4d544c63c5b340877327d31ad028296c875c0d8adb" }
+	}
+	, "volume": {
+		  "default":   "30"
+		, "max":       "100"
+		, "att":       "20"
+		, "start_min": "20"
+		, "start_max": "70"
+	}
+	, "flask": {
+		  "port_www": 8289
+		, "password": "(hash)" 
+	}
+	, "zeromq": {
+		"port": 5555
+		, "port_publisher": 5559
+		, "port_subscriber": 5560
+	}
+	, "auto_update": {
+		  "mode": "all"
+		, "url": "https://github.com/Sjoerd82/defender-headunit"
+	}
+	,"logging": {
+		"console": {
+			  "enabled":true
+			, "loglevel":20
+		}
+		, "file": {
+			  "enabled":true
+			, "loglevel":20
+		}
+		, "syslog": {
+			  "enabled":true
+			, "loglevel":20
+			, "host":""
+			, "port":""
+			, "socktype":"UDP"
+			, "address":"/dev/log"
+			, "facility":"HEADUNIT"
+		}
+	}
+	, "source_config": {
+		  "locmus" : { "local_media" : 
+		            [ { "name":"Data1", "mountpoint": "/media/PIHU_DATA", "mpd_dir": "PIHU_DATA"}
+		            , { "name":"Data2", "mountpoint": "/media/PIHU_DATA2", "mpd_dir": "PIHU_DATA2" } ]
+		  }
+		, "example": { "subsources" : 
+		            [ { "name":"Data1", "label": "PD1", "mountpoint": "/media/PIHU_DATA", "mpd_dir": "PIHU_DATA"}
+		            , { "name":"Data2", "label": "PD2", "mountpoint": "/media/PIHU_DATA2", "mpd_dir": "PIHU_DATA2" } ]
+		  }
+		, "smb": {
+				"smb_sources": [ { "label": "Music1", "mountpoint": "/media/PIHU_SMB/music", "musicdir_mpd": "PIHU_SMB/music" } ]
+		}
+		, "fm": {
+			  "frq_lo"   : 80
+			, "stations" : ["96.40","99.10","101.20","102.54"]
+			}
+		, "media": {
+			"exclude" : ["/PIHU_DATA","/PIHU_DATA2","/PIHU_SMB"]
+		}
+		, "streams": {
+			  "subsources": "stream_groups"
+			, "stream_groups": [
+				  {	  "group_name": "NPO"
+					, "streams" : [
+						{ "name": "NPO 3FM",
+						  "uri" : "http://icecast.omroep.nl/3fm-bb-mp3" }
+					]
+				}
+				, {	  "group_name": "NL Commercial"
+					, "streams": [
+						{ "name": "BNR",
+						  "uri" : "http://icecast-bnr.cdp.triple-it.nl/bnr_mp3_96_06" },
+						{ "name": "QMusic",
+						  "uri" : "http://icecast-qmusic.cdp.triple-it.nl/Qmusic_nl_live_96.mp3" },
+						{ "name": "QMusic Foute Uur",
+						  "uri" : "http://icecast-qmusic.cdp.triple-it.nl:80/Qmusic_nl_fouteuur_96.mp3" },
+						{ "name": "538",
+						  "uri" : "http://vip-icecast.538.lw.triple-it.nl:80/RADIO538_MP3" },
+						{ "name": "Arrow Classic Rock",
+						  "uri" : "http://91.221.151.155:80" },
+						{ "name": "Sky Radio",
+						  "uri" : "http://20103.live.streamtheworld.com:80/SKYRADIO_SC" }
+					]
+				}
+				, {	  "group_name": "International 1"
+					, "streams": [
+						{ "name": "BBC World Service",
+						  "uri" : "http://bbcwssc.ic.llnwd.net/stream/bbcwssc_mp1_ws-eieuk" },
+						{ "name": "BBC Radio 2",
+						"uri" : "http://as-hls-ww-live.bbcfmt.hs.llnwd.net/pool_7/live/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8" }
+					  ]
+				}
+				, {	  "group_name": "International 2"
+					, "streams": [
+						{ "name": "KEXP",
+						  "uri" : "http://live-aacplus-64.kexp.org/kexp64.aac" },
+						{ "name": "KCRW",
+						  "uri" : "http://kcrw.streamguys1.com/kcrw_192k_mp3_on_air_internet_radio" },
+						{ "name": "Irish Pub Radio",
+						  "uri" : "http://178.32.219.72:8326" }
+					]				
+				}
+			]
+		}
+	}
+	, "plugins_other": {
+		"scrobbler": {"lastfm_password_hash": "64828e435bff400260a0d8f595644544", "lastfm_api_secret": "e7377c56280a4edec2442c3d1a8ee0ce", "lastfm_api_key": "6aec32f8c9d6e39aefdb9606d45ae8a0", "lastfm_username": "SjoerdVenema"}
+	}
+	, "x_plugins_source":  [
+	]
+	, "x_plugins_control": [
+	]
+	, "x_plugins_display": [
+	]
+	, "x_plugins_other":   [
+	]
+	, "system_configuration":
+	{
+		  "SYSLOGD_ARGS":"-n -O /var/log/messages"
+		, "KLOGD_ARGS":"-n"
+		, "dbus": {
+			  "location":"/usr/share/dbus-1/system.d/hu.conf"
+			, "services": [
+				  "com.arctura.hu"
+				, "com.arctura.keyboard"
+				, "com.arctura.mpd"
+				, "com.arctura.remote"
+				, "com.arctura.volume" ]
+		}
+		, "wpa_supplicant": {
+			  "location":       "/etc/wpa_supplicant.conf"
+			, "ctrl_interface": "/var/run/wpa_supplicant"
+			, "update_config":  "1"
+			, "network": [
+				  {   "ssid": "OpenWrt"
+					, "psk":  "f22da64fa334468e8b0ace4d544c63c5b340877327d31ad028296c875c0d8adb" }
+				, {   "ssid": "SecondNetwork"
+					, "psk":  "f22da64fa334468e8b0ace4d544c63c5b340877327d31ad028296c875c0d8adb" } ]
+		}
+		, "hostapd": {
+			  "location":      "/etc/hostapd.conf"
+			, "interface":     "wlan0"
+			, "driver":        "nl80211"
+			, "hw_mode":       "g"
+			, "ieee80211n":    "1"
+			, "wmm_enabled":   "1"
+			, "macaddr_acl":   "0"
+			, "ssid":          "r0ckb0x"
+			, "channel":       "1"
+			, "wpa":           "2"
+			, "auth_algs":     "1"
+			, "wpa_key_mgmt":  "WPA-PSK"
+			, "wpa_psk":       "889bcfb6b711150c91e2078f34876dcc417741ddb60e6f119dc25c6968363309"
+			, "wpa_pairwise":  "TKIP"
+			, "rsn_pairwise":  "CCMP"
+		}
+		, "dnsmasq": {
+			  "location":      "/etc/dnsmasq.conf"
+			, "interface":     "wlan0"
+			, "listen-address":"172.24.1.1"
+			, "bind-dynamic":  null
+			, "dhcp-range":    "172.24.1.50,172.24.1.150,255.255.255.0,24h"
+			
+		}
+		, "mpd": {
+			  "location":           "/etc/mpd.conf"
+			, "music_directory":    "/media"
+			, "playlist_directory": "/var/lib/mpd/playlists"
+			, "db_file":            "/var/lib/mpd/database"
+			, "log_file":           "/var/log/mpd.log"
+			, "pid_file":           "/run/mpd.pid"
+			, "state_file":         "/var/lib/mpd/state"
+			, "sticker_file":       "/var/lib/mpd/sticker.sql"
+			, "user":                   "root"
+			, "bind_to_address":        "0.0.0.0"
+			, "port":                   "6600"
+			, "max_playlist_length":    "32000"
+			, "connection_timeout":     "2000000"
+			, "follow_outside_symlinks":"yes"
+			, "follow_inside_symlinks": "yes"
+			, "audio_output": [
+				  {   "type":"alsa" 
+				     , "name":"HiFiberry DAC"
+					 , "device":"hw:0,0"
+				  }
+				, {  "type":"pipe" 
+				     , "name":"Alsa: DSP crossover/eq 2 channel mono"
+				     , "format":"44100:32:2"
+				     , "mixer_type":"software"
+					 , "command":"ecasound -q -z:nodb -z:mixmode,sum -a:pre -f:s32_le,2,44100 -i:stdin -pf:/etc/pre.ecp -o:loop,1 -a:woofer,tweeter -i:loop,1 -a:woofer -pf:/etc/woofer.ecp -chorder:1,0 -a:tweeter -pf:/etc/tweeter.ecp -chorder:0,2 -a:woofer,tweeter -f:16,4,44100 -o:alsa"
+				  }
+				, {  "type":"pipe" 
+				     , "name":"Jack: DSP crossover/eq 2 channel mono"
+				     , "format":"44100:32:2"
+				     , "mixer_type":"software"
+					 , "command":"ecasound -q -z:nodb -z:mixmode,sum -a:pre -f:s32_le,2,44100 -i:stdin -pf:/etc/pre.ecp -o:loop,1 -a:woofer,tweeter -i:loop,1 -a:woofer -pf:/etc/woofer.ecp -chorder:1,0 -a:tweeter -pf:/etc/tweeter.ecp -chorder:0,2 -a:woofer,tweeter -f:16,4,44100 -o:jack"
+				  }
+				, {  "type":"pipe" 
+				     , "name":"Alsa: DSP crossover/eq 4 channel stereo"
+				     , "format":"44100:32:2"
+				     , "mixer_type":"software"
+					 , "command":"ecasound -q -z:nodb -z:mixmode,sum -a:pre -f:s32_le,2,44100 -i:stdin -pf:/etc/pre.ecp -o:loop,1 -a:woofer,tweeter -i:loop,1 -a:woofer -pf:/etc/woofer.ecp -chorder:1,2,0,0 -a:tweeter -pf:/etc/tweeter.ecp -chorder:0,0,1,2 -a:woofer,tweeter -f:16,4,44100 -o:alsa"
+				  }
+				, {  "type":"jack"
+				    , "name":"Jack"
+					, "enabled":"yes"
+				   }
+				, {  "type":"pulse"
+				    , "name":"PulseAudio"
+					, "enabled":"no"
+				   } ]
+		}
+		, "smb": {
+			  "location":           "/etc/samba/smb.conf"
+			, "global": {
+				  "workgroup":      "MYGROUP"
+				, "server string":  "Samba Server Version %v"
+				, "security":       "user"
+				, "passdb backend": "tdbsam"
+				, "load printers":  "no"
+				, "printcap name":  "/dev/null"
+			}
+			, "shares": { 	  
+				"music":{
+					  "path":           "/media/PIHU_DATA"
+					, "force group":    "users"
+					, "create mask":    "0666"
+					, "directory mask": "0777"
+					, "browsable":      "yes"
+					, "writable":       "yes"
+					, "guest ok":       "yes"
+				}
+				, "config": {
+					  "path":           "/media/PIHU_CONFIG"
+					, "force group":    "users"
+					, "create mask":    "0666"
+					, "directory mask": "0777"
+					, "browsable":      "yes"
+					, "writable":       "yes"
+					, "guest ok":       "yes"
+				}
+			}
+		}
+	}
+	, "shutdown_cmd": ["halt"]
+}

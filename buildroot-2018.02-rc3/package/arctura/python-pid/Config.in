@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_PID
+	bool "python-pid"
+	#select BR2_PACKAGE_PYTHON_NOSE
+	help
+	  Pidfile featuring stale detection and file-locking,
+	  can also be used as context-manager or decorator
+
+	  https://pypi.python.org/pypi/pid/2.1.1

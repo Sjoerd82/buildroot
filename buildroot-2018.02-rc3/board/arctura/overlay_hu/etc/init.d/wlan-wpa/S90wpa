@@ -1,0 +1,62 @@
+#!/bin/sh
+
+#
+# WPA
+#
+
+WPA_SUP=/usr/sbin/wpa_supplicant
+WPA_SUP_CONF=/etc/wpa_supplicant.conf
+WPA_SUP_PID=/var/run/wpa_supplicant.pid
+WPA_SUP_OPTS=" -B -i wlan0 -W -D nl80211, wext -P $WPA_SUP_PID -c $WPA_SUP_CONF"
+
+WPA_CLI=/usr/sbin/wpa_cli
+WPA_CLI_PID="/var/run/wpa_cli.pid"
+WPA_CLI_OPTS="-B -i wlan0 -p /var/run/wpa_supplicant -P /var/run/wpa_cli.pid -a /sbin/wpa_action"
+
+start() {
+        # start wpa_supplicant
+        start-stop-daemon -b -q -m -x $WPA_SUP -p $WPA_SUP_PID --oknodo -S -- $WPA_SUP_OPTS
+        retval1=$?
+        [ $retval1 = 0 ] && echo "OK" || echo "FAIL"
+        # wait for socket creation
+        sleep 1
+
+        # start wpa_cli
+        start-stop-daemon -b -q -m -x $WPA_CLI -p $WPA_CLI_PID --oknodo -S -- $WPA_CLI_OPTS
+        retval2=$?
+        [ $retval2 = 0 ] && echo "OK" || echo "FAIL"
+
+        retval_sum=`expr $retval1 + $retval2`
+        exit $retval_sum
+}
+
+stop() {
+        echo "Stopping"
+        start-stop-daemon -K -q -p $WPA_CLI_PID --oknodo
+        [ $? = 0 ] && echo "OK" || echo "FAIL"
+
+        start-stop-daemon -K -q -p $WPA_SUP_PID --oknodo
+        [ $? = 0 ] && echo "OK" || echo "FAIL"
+
+        #kill $(cat /var/run/wpa_cli.pid)
+        #kill $(cat /var/run/wpa_supplicant.pid)
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+        start
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
+

@@ -1,0 +1,9 @@
+config BR2_PACKAGE_RPI_WS281X
+	bool "rpi_ws281x"
+	select HOST_SCONS
+	select SWIG
+	help
+	  Userspace Raspberry Pi PWM library for WS281X LEDs
+
+	  https://github.com/jgarff/rpi_ws281x
+

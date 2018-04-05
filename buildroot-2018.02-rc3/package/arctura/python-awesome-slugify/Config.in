@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_AWESOME_SLUGIFY
+        bool "python-awesome-slugify"
+        help
+          Python flexible slugify function
+
+          https://pypi.python.org/pypi/awesome-slugify

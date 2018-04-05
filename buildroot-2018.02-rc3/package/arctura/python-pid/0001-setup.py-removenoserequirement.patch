@@ -1,0 +1,9 @@
+--- python-pid/setup.py
++++ python-pid/setup.py
+@@ -54,5 +54,5 @@
+     packages=["pid"],
+     install_requires=[],
+     test_suite='nose.collector',
+-    setup_requires=['nose>=1.0'],
++    setup_requires=[],
+ )

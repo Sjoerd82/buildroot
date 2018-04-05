@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_COLORED
+	bool "python-colored"
+	help
+	  Simple library for color and formatting to terminal
+
+	  https://pypi.python.org/pypi/colored

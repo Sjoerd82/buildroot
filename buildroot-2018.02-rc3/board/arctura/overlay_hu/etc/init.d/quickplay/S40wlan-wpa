@@ -1,0 +1,77 @@
+#!/bin/sh
+
+
+# Start/Stop all init scripts in /etc/init.d/wlan-wpa
+# Start: executing them in numerical order.
+# Stop: executing them in reversed numerical order.
+#
+
+EXEC_PATH=/etc/init.d/wlan-wpa
+STATE_FILE=/root/WLAN-WPA
+
+if [[ ! -f $STATE_FILE ]] && [[ "$1" == "start" ]]; then
+        exit 0
+fi
+
+retval_sum=0
+
+case "$1" in
+        start)
+                printf "Start execution of wlan-ap scripts"
+                for i in $EXEC_PATH/S??* ;do
+
+                     # Ignore dangling symlinks (if any).
+                     [ ! -f "$i" ] && continue
+
+                     case "$i" in
+                        *.sh)
+                            # Source shell script for speed.
+                            (
+                                trap - INT QUIT TSTP
+                                set start
+                                . $i
+                            )
+                            ;;
+                        *)
+                            # No sh extension, so fork subprocess.
+                            $i start
+                            retval_sum=`expr $retval_sum + $?`
+                            ;;
+                    esac
+                done
+
+                ;;
+        stop)
+                printf "Stopping execution of wlan-ap scripts"
+                for i in $(ls -r $EXEC_PATH/S??*) ;do
+
+                     # Ignore dangling symlinks (if any).
+                     [ ! -f "$i" ] && continue
+
+                     case "$i" in
+                        *.sh)
+                            # Source shell script for speed.
+                            (
+                                trap - INT QUIT TSTP
+                                set stop
+                                . $i
+                            )
+                            ;;
+                        *)
+                            # No sh extension, so fork subprocess.
+                            $i stop
+                            ;;
+                    esac
+                done
+
+                ;;
+        restart|reload)
+                $0 stop
+                $0 start
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|restart}"
+                exit 1
+esac
+
+exit $retval_sum

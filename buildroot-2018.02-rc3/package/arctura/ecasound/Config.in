@@ -1,0 +1,9 @@
+config BR2_PACKAGE_ECASOUND
+	bool "ecasound"
+	select BR2_PACKAGE_READLINE
+	select BR2_JACK2
+	help
+	  Ecasound is a software package designed for multitrack audio processing.
+
+	  https://ecasound.seul.org/ecasound/
+

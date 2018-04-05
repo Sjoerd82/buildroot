@@ -1,0 +1,26 @@
+#!/bin/sh
+
+echo $(date "+%H:%M.%s") $0 $1 >> /root/boot.log
+
+#
+# Todo: This should change, obviously
+
+
+start() {
+                mkdir -p /media/PIHU_SMB/music
+				# TODO: check if already mounted
+				#if ! mountpoint -q /media/PIHU_SMB/music; then
+                mount -t cifs -o user=root,password=kungfu //172.16.8.11/music/mpd /media/PIHU_SMB/music
+				#fi
+        }
+
+case "$1" in
+  start)
+        start
+        ;;
+  *)
+        echo "Usage: $0 {start}"
+        exit 1
+esac
+
+exit $?

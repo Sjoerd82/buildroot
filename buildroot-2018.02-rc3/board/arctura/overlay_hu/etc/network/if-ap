@@ -1,0 +1,8 @@
+auto wlan0
+iface wlan0 inet static
+  address 172.24.1.1
+  netmask 255.255.255.0
+  network 172.24.1.0
+  broadcast 172.24.1.255
+  post-up mpc sendmessage ifup wlan0
+  post-down mpc sendmessage ifdown wlan0

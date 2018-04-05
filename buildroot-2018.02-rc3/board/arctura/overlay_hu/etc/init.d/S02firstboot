@@ -1,0 +1,96 @@
+#!/bin/sh
+
+echo $(date "+%H:%M.%s") $0 $1 >> /root/boot.log
+
+#
+# Execute only on first boot (or when log file not present)
+#
+
+FLAG="/root/firstboot.log"
+
+start() {
+	if [ ! -f $FLAG ]; then
+		#Put here your initialization sentences
+		echo "This is the first boot"
+		touch $FLAG
+
+		# PIHU_APP
+		# We now create this image in Buildroot
+		#mkfs.ext4 -F /dev/mmcblk0p3
+		#e2label /dev/mmcblk0p3 PIHU_APP
+
+        # to create the partitions programatically (rather than manually)
+        # we're going to simulate the manual input to fdisk
+        # The sed script strips off all the comments so that we can
+        # document what we're doing in-line with the actual commands
+        # Note that a blank line (commented as "defualt" will send a empty
+        # line terminated with a newline to take the fdisk default.
+sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk /dev/mmcblk0
+ n # new...
+ e # ..extended..
+   # default - first sector
+   # default - last sector
+ n # new partition
+   # default - first sector
++32M # 32MB
+ t # set partition type..
+   # ..of the last created partition..
+ c # ..to W95 FAT32 (LBA)
+ n # new partition
+   # default - first sector
+   # default - last sector
+ t # set partition type..
+   # ..of the last created partition..
+ c # ..to W95 FAT32 (LBA)
+ w # quit and write the partition table and we're done (q not needed)
+EOF
+
+        	partprobe -s /dev/mmcblk0
+	        mkdosfs -I -n PIHU_CONFIG /dev/mmcblk0p5
+	        mkdosfs -F 32 -I -n PIHU_DATA /dev/mmcblk0p6
+	        #reboot -f
+
+		#
+		# Install PIHU application
+		#
+		mount /dev/mmcblk0p3 /mnt/PIHU_APP
+		mount /dev/mmcblk0p5 /mnt/PIHU_CONFIG
+	
+		# config
+		cp -rf /mnt/PIHU_APP/defender-headunit/config/* /mnt/PIHU_CONFIG
+	
+		# init.d
+		cp -rf /mnt/PIHU_APP/defender-headunit/init.d/* /etc/init.d
+	
+		# run config-tool
+		/mnt/PIHU_APP/defender-headunit/config-tool.py -c /mnt/PIHU_CONFIG/configuration.json --all
+
+		# unmout (will be remounted later in init)
+		umount /dev/mmcblk0p3
+		umount /dev/mmcblk0p5
+
+		#
+		# Samba user
+		#
+		echo -e "abovebeyond\nabovebeyond" | smbpasswd -s -a root
+
+		#
+		# Default WLAN0 behaviour: AP
+		#
+		#touch /root/WLAN-AP
+
+        else
+		echo "First boot: Not the first boot, do nothing"
+        fi
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  *)
+        echo "Usage: $0 {start}"
+        exit 1
+esac
+
+exit $?

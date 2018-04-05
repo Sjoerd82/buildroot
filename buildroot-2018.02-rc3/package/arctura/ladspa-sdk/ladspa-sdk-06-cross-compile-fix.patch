@@ -1,0 +1,35 @@
+--- ladspa-sdk-1.13.original/src/makefile	2014-04-24 19:59:18.151359520 +0100
++++ ladspa-sdk-1.13/src/makefile	2014-04-24 20:01:42.820770007 +0100
+@@ -15,8 +15,8 @@
+ 
+ INCLUDES	=	-I.
+ LIBRARIES	=	-ldl -lm
+-CFLAGS		=	$(INCLUDES) -Wall -Werror -O3 -fPIC
+-CXXFLAGS	=	$(CFLAGS)
++CFLAGS		+=	$(INCLUDES) -Wall -fPIC
++CXXFLAGS	+=	$(CFLAGS)
+ PLUGINS		=	../plugins/amp.so				\
+ 			../plugins/delay.so				\
+ 			../plugins/filter.so				\
+@@ -25,8 +25,8 @@
+ PROGRAMS	=	../bin/analyseplugin				\
+ 			../bin/applyplugin 				\
+ 			../bin/listplugins
+-CC		=	cc
+-CPP		=	c++
++CC		?=	cc
++CXX		?=	c++
+ 
+ ###############################################################################
+ #
+@@ -38,8 +38,8 @@
+ 	$(LD) -o ../plugins/$*.so plugins/$*.o -shared
+ 
+ ../plugins/%.so:	plugins/%.cpp ladspa.h
+-	$(CPP) $(CXXFLAGS) -o plugins/$*.o -c plugins/$*.cpp
+-	$(CPP) -o ../plugins/$*.so plugins/$*.o -shared
++	$(CXX) $(CXXFLAGS) -o plugins/$*.o -c plugins/$*.cpp
++	$(CXX) -o ../plugins/$*.so plugins/$*.o -shared
+ 
+ ###############################################################################
+ #

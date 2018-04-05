@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#
+# Set location of configuration file
+#
+
+export HU_CONFIG_FILE=/mnt/PIHU_CONFIG/configuration.json
+export PYTHONPATH=/mnt/PIHU_APP/defender-headunit/modules/:$PYTHONPATH

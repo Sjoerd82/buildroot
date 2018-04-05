@@ -1,0 +1,56 @@
+image boot.vfat {
+  vfat {
+    files = {
+      "bcm2708-rpi-b-plus.dtb",
+      "bcm2708-rpi-0-w.dtb",
+      "rpi-firmware/bootcode.bin",
+      "rpi-firmware/cmdline.txt",
+      "rpi-firmware/config.txt",
+      "rpi-firmware/fixup.dat",
+      "rpi-firmware/start.elf",
+      "zImage"
+    }
+
+    file overlays/hifiberry-dac.dtbo {
+      image = "rpi-firmware/overlays/hifiberry-dac.dtbo"
+    }
+
+    extraargs = "-n PIHU_BOOT"
+  }
+  size = 32M
+}
+
+image data.vfat {
+  vfat {
+    files = {
+      "zImage"
+    }
+    extraargs = "-n PIHU_DATA"
+  }
+  size = 32M
+}
+
+image sdcard.img {
+  hdimage {
+  }
+
+  partition boot {
+    partition-type = 0xC
+    bootable = "true"
+    image = "boot.vfat"
+  }
+
+  # size set in make menuconfig (1GB)
+  partition rootfs {
+    partition-type = 0x83
+    image = "rootfs.ext4"
+  }
+
+  # to be grown to remaining space on first boot
+  partition data {
+    partition-type = 0xC
+    image = "data.vfat"
+  }
+
+
+}

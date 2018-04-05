@@ -1,0 +1,8 @@
+--- rt-plugins/cmake/compilerwarnings.cmake
++++ rt-plugins/cmake/compilerwarnings.cmake
+@@ -1,4 +1,4 @@
+-set( WARNINGS_COMMONFLAGS "${WARNINGS_COMMONFLAGS} -Werror" )
++#set( WARNINGS_COMMONFLAGS "${WARNINGS_COMMONFLAGS} -Werror" )
+ set( WARNINGS_COMMONFLAGS "${WARNINGS_COMMONFLAGS} -Wall" )
+ set( WARNINGS_COMMONFLAGS "${WARNINGS_COMMONFLAGS} -Wextra" )
+ set( WARNINGS_COMMONFLAGS "${WARNINGS_COMMONFLAGS} -pedantic" )
