@@ -16,6 +16,7 @@ define LADSPA_SDK_BUILD_CMDS
 endef
 
 define LADSPA_SDK_INSTALL_TARGET_CMDS
+	mkdir -p $(TARGET_DIR)/usr/lib/ladspa/ 
 	$(INSTALL) -D -m 0644 $(@D)/plugins/*.so $(TARGET_DIR)/usr/lib/ladspa/
 	$(INSTALL) -D -m 0755 $(@D)/bin/* $(TARGET_DIR)/usr/bin/
 endef
